@@ -60,10 +60,7 @@ class AuthController extends Controller {
                 },
             });
 
-            const otp = generateOtp();
-            sendOtp(user.phonenumber, otp, "login");
-
-            return super.success(res, "success", { user: new UserResource().get(user), otp: otp });
+            return super.success(res, "success", { user: new UserResource().get(user) });
         } catch (error: any) {
             console.error(error.message);
             return super.error(res, error.message);
@@ -90,12 +87,32 @@ class AuthController extends Controller {
 
             if (await checkDailyLimit(user.phonenumber, "login"))
                 return super.badRequest(res, "Batas percobaan harian telah tercapai");
-            if (await checkThrottle(user.phonenumber, "login")) return super.badRequest(res, "Coba lagi dalam 1 menit");
+            // if (await checkThrottle(user.phonenumber, "login")) return super.badRequest(res, "Coba lagi dalam 1 menit");
 
-            const otp = generateOtp();
-            sendOtp(user.phonenumber, otp, "login");
+            const refreshToken = getRefreshToken({
+                phonenumber: user.phonenumber,
+            });
 
-            return super.success(res, "success", { otp: otp });
+            const accessToken = getAccessToken({
+                phonenumber: user.phonenumber,
+            });
+
+            await prisma.token.create({
+                data: {
+                    user: {
+                        connect: {
+                            id: user.id,
+                        },
+                    },
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                },
+            });
+
+            return super.success(res, "success", {
+                accessToken,
+                refreshToken,
+            });
         } catch (error: any) {
             console.error(error.message);
             return super.error(res, error.message);
