@@ -35,7 +35,9 @@ class App {
         this.app.use(cors());
         this.app.use(morgan("dev"));
         this.app.use(compression());
-        this.app.use(helmet());
+        this.app.use(helmet({
+            crossOriginResourcePolicy: false,
+        }));
         this.app.use(
             "/storage",
             express.static(path.join(__dirname, "public/uploads")),

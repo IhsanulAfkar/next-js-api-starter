@@ -92,7 +92,7 @@ class AuthController extends Controller {
             const refreshToken = getRefreshToken({
                 phonenumber: user.phonenumber,
             });
-
+            console.log(refreshToken)
             const accessToken = getAccessToken({
                 phonenumber: user.phonenumber,
             });
@@ -110,6 +110,10 @@ class AuthController extends Controller {
             });
 
             return super.success(res, "success", {
+                user: {
+                    id: user.id,
+                    name: user.name
+                },
                 accessToken,
                 refreshToken,
             });
@@ -158,8 +162,8 @@ class AuthController extends Controller {
                     refreshToken: refreshToken,
                 },
             });
-
             return super.success(res, "success", {
+                id: user.id,
                 accessToken,
                 refreshToken,
             });
