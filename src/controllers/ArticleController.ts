@@ -172,7 +172,12 @@ class ArticleController extends Controller {
                     if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
                 });
             }
-
+            await prisma.articleImage.deleteMany({
+                where: { articleId: article.id }
+            })
+            await prisma.article.delete({
+                where: { id: article.id }
+            })
             return super.success(res, "success");
         } catch (error: any) {
             console.error(error.message);
