@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  http-proxy-middleware>http-proxy: github:nikeee/node-http-proxy#b42c38fc3486ee8ad4374cc2397458b6e4cd99ca
+
 importers:
 
   .:
@@ -1348,6 +1351,11 @@ packages:
 
   http-proxy@1.18.1:
     resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
+    engines: {node: '>=8.0.0'}
+
+  http-proxy@https://codeload.github.com/nikeee/node-http-proxy/tar.gz/b42c38fc3486ee8ad4374cc2397458b6e4cd99ca:
+    resolution: {tarball: https://codeload.github.com/nikeee/node-http-proxy/tar.gz/b42c38fc3486ee8ad4374cc2397458b6e4cd99ca}
+    version: 1.18.1
     engines: {node: '>=8.0.0'}
 
   https-proxy-agent@5.0.1:
@@ -3735,14 +3743,22 @@ snapshots:
     dependencies:
       '@types/http-proxy': 1.17.16
       debug: 4.4.1
-      http-proxy: 1.18.1(debug@4.4.1)
+      http-proxy: https://codeload.github.com/nikeee/node-http-proxy/tar.gz/b42c38fc3486ee8ad4374cc2397458b6e4cd99ca(debug@4.4.1)
       is-glob: 4.0.3
       is-plain-object: 5.0.0
       micromatch: 4.0.8
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy@1.18.1(debug@4.4.1):
+  http-proxy@1.18.1:
+    dependencies:
+      eventemitter3: 4.0.7
+      follow-redirects: 1.15.9(debug@4.4.1)
+      requires-port: 1.0.0
+    transitivePeerDependencies:
+      - debug
+
+  http-proxy@https://codeload.github.com/nikeee/node-http-proxy/tar.gz/b42c38fc3486ee8ad4374cc2397458b6e4cd99ca(debug@4.4.1):
     dependencies:
       eventemitter3: 4.0.7
       follow-redirects: 1.15.9(debug@4.4.1)
@@ -3909,7 +3925,7 @@ snapshots:
 
   koa-proxies@0.12.4(koa@3.0.0):
     dependencies:
-      http-proxy: 1.18.1(debug@4.4.1)
+      http-proxy: 1.18.1
       koa: 3.0.0
       path-match: 1.2.4
       uuid: 8.3.2

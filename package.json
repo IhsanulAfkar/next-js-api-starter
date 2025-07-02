@@ -69,6 +69,9 @@
         "typescript-eslint": "^8.30.1"
     },
     "pnpm": {
+        "overrides": {
+            "http-proxy-middleware>http-proxy": "github:nikeee/node-http-proxy#b42c38fc3486ee8ad4374cc2397458b6e4cd99ca"
+        },
         "onlyBuiltDependencies": [
             "@prisma/client",
             "@prisma/engines",
