@@ -3,12 +3,13 @@ import { Router } from "express";
 import Controller from "./Controller";
 import { ArticleResource } from "@resources/index";
 import { deleteFile, saveFile } from "@helpers/File";
-import slug from "slug";
+
 import { validate as uuidValidate } from "uuid";
 import { prisma } from "@helpers/Prisma";
 import { joiValidate } from "@helpers/Joi";
 import Joi from "joi";
 import { autobind } from "@utils/Autobind";
+import slugify from "slugify";
 
 class ArticleController extends Controller {
     private router: Router;
@@ -108,7 +109,7 @@ class ArticleController extends Controller {
             );
             if (validationErrors) return super.badRequest(res, validationErrors);
 
-            const slugTitle = slug(title, { lower: true });
+            const slugTitle = slugify(title, { lower: true });
             const existingSlug = await prisma.article.findUnique({ where: { slug: slugTitle } });
             if (existingSlug) return super.badRequest(res, "Title already exists");
 

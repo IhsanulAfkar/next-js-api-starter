@@ -5,17 +5,20 @@ import { prisma } from "@helpers/Prisma";
 const AuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
-        if (!token)
+        if (!token) {
+            console.log('masuk sini')
             return res.status(401).json({
                 data: null,
                 message: "Unauthenticated",
                 status: 401,
             });
 
+        }
         let decoded;
         try {
             decoded = verifyAccessToken(token);
         } catch (error) {
+            console.error(error)
             return res.status(401).json({
                 data: null,
                 message: "expired_token",
@@ -28,25 +31,27 @@ const AuthMiddleware = async (req: Request, res: Response, next: NextFunction) =
                 accessToken: token,
             },
         });
-        if (!dbtoken)
+        if (!dbtoken) {
+
             return res.status(401).json({
                 data: null,
                 message: "Unauthenticated",
                 status: 401,
             });
 
+        }
         const user = await prisma.user.findFirst({
             where: {
                 phonenumber: decoded.phonenumber,
             },
         });
-        if (!user)
+        if (!user) {
             return res.status(401).json({
                 data: null,
                 message: "Unauthenticated",
                 status: 401,
             });
-
+        }
         req.user = {
             ...user,
             token: dbtoken.accessToken,

@@ -1,9 +1,9 @@
 import Controller from "./Controller";
 import type { Request, Response } from "express";
 import { Router } from "express";
-import { hashPassword } from "@helpers/Bcrypt";
+import { comparePassword, hashPassword } from "@helpers/Bcrypt";
 import { formatPhonenumber } from "@helpers/Formatter";
-import { getRefreshToken, getAccessToken, verifyRefreshToken } from "@helpers/Jwt";
+import { getRefreshToken, getAccessToken, verifyRefreshToken, getAccessTokenExpired, getRefreshTokenExpired } from "@helpers/Jwt";
 import { generateOtp, sendOtp, verifyOtp, checkThrottle, checkDailyLimit } from "@helpers/Otp";
 import { AuthMiddleware } from "../middlewares";
 import { UserResource } from "@resources/index";
@@ -40,25 +40,32 @@ class AuthController extends Controller {
                 req,
                 Joi.object({
                     name: Joi.string().required(),
+                    username: Joi.string().required(),
                     phonenumber: Joi.string().required(),
+                    password: Joi.string().min(8).required(),
                 })
             );
             if (validationErrors) return super.badRequest(res, validationErrors);
 
-            const { name, phonenumber } = req.body;
+            const { name, username, phonenumber, password } = req.body;
 
             const userExists = await prisma.user.findFirst({
                 where: {
-                    phonenumber: formatPhonenumber(phonenumber),
+                    OR: [{
+                        phonenumber: formatPhonenumber(phonenumber)
+                    }, {
+                        username
+                    }]
                 },
             });
             if (userExists) return super.badRequest(res, "Nomor telepon sudah terdaftar");
 
             const user = await prisma.user.create({
                 data: {
-                    name: name,
+                    name,
+                    username,
                     phonenumber: formatPhonenumber(phonenumber),
-                    password: await hashPassword("12345678"),
+                    password: await hashPassword(password),
                 },
             });
 
@@ -77,15 +84,16 @@ class AuthController extends Controller {
             const validationErrors = await joiValidate(
                 req,
                 Joi.object({
-                    phonenumber: Joi.string().required(),
+                    username: Joi.string().required(),
+                    password: Joi.string().required()
                 })
             );
             if (validationErrors) return super.badRequest(res, validationErrors);
 
-            const { phonenumber } = req.body;
+            const { username, password } = req.body;
             const user = await prisma.user.findFirst({
                 where: {
-                    phonenumber: formatPhonenumber(phonenumber),
+                    username,
                 },
             });
             if (!user) return super.notFound(res, "User Not Found");
@@ -94,11 +102,32 @@ class AuthController extends Controller {
 
             const { throttling, remaining } = await checkThrottle(user.phonenumber, "login");
             if (throttling) return super.badRequest(res, `Batas percobaan telah tercapai, silahkan coba lagi dalam ${remaining} detik`);
+            const isMatch = await comparePassword(password, user.password);
+            if (!isMatch) {
+                return super.unauthorized(res, null, "Password salah");
+            }
 
-            const otp = generateOtp();
-            sendOtp(user.phonenumber, otp, "login");
+            const refreshToken = getRefreshToken({ phonenumber: user.phonenumber! });
+            const accessToken = getAccessToken({ phonenumber: user.phonenumber! });
+            await prisma.token.create({
+                data: {
+                    user: {
+                        connect: {
+                            id: user.id,
+                        },
+                    },
+                    accessToken,
+                    refreshToken,
+                },
+            });
 
-            return super.success(res, { otp: otp });
+            return super.success(res, {
+                accessToken,
+                refreshToken,
+                user: new UserResource().get(user),
+                accessTokenExpired: getAccessTokenExpired(),
+                refreshTokenExpired: getRefreshTokenExpired(),
+            });
         } catch (error: any) {
             console.error(error);
             return super.error(res);

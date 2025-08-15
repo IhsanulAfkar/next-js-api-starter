@@ -15,6 +15,7 @@ export default class UserResource {
         return {
             id: User.id,
             name: User.name,
+            username:User.username,
             phonenumber: User.phonenumber,
         };
     }
