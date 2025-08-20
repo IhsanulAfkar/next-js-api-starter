@@ -12,10 +12,17 @@ export default class ArticleImageResource {
     }
 
     transform(article: ArticleImage): object {
+        const constructUrl = () => {
+            if (process.env.NODE_ENV == 'development') {
+                return process.env.APP_URL + ':' + process.env.APP_PORT + "/storage/" + article.path
+            }
+            return process.env.APP_URL + "/storage/" + article.path
+
+        }
         return {
             id: article.id,
             article_id: article.articleId,
-            url: process.env.APP_URL + "/storage/" + article.path,
+            url:constructUrl() ,
         };
     }
 }

@@ -6,7 +6,7 @@ import { prisma } from "@helpers/Prisma";
 import { errsole, initializeErrsole } from "@services/Errsole";
 import { SocketService } from "@services/Socket";
 import { ApiKeyMiddleware, MulterMiddleware, MorganMiddleware, AuthMiddleware } from "@middlewares/index";
-import { NotificationController, AuthController, ArticleController, ArticleCategoryController, MessageController } from "@controllers/index";
+import { NotificationController, AuthController, ArticleController, ArticleCategoryController, MessageController, TestSocketController, PublicController } from "@controllers/index";
 import cors from "cors";
 import compression from "compression";
 import helmet from "helmet";
@@ -48,11 +48,12 @@ class App {
     public routes(): void {
         // insert routes here
         this.app.use("/", AuthController);
+        this.app.use('/pub', PublicController)
         this.app.use("/notifications", AuthMiddleware, NotificationController);
         this.app.use("/article-categories", AuthMiddleware, ArticleCategoryController);
         this.app.use("/articles", AuthMiddleware, ArticleController);
         this.app.use("/messages", AuthMiddleware, MessageController);
-
+        this.app.use('/test-socket', AuthMiddleware, TestSocketController)
         // Handle unknown routes (catch-all route)
         const notFoundHandler: RequestHandler = (_req: Request, res: Response, _next: NextFunction): void => {
             res.status(404).json({

@@ -11,7 +11,7 @@ import Joi from "joi";
 import { autobind } from "@utils/Autobind";
 import slugify from "slugify";
 
-class ArticleController extends Controller {
+class PublicController extends Controller {
     private router: Router;
 
     constructor() {
@@ -26,11 +26,8 @@ class ArticleController extends Controller {
     }
 
     private routes(): void {
-        this.router.get("/", this.index);
-        this.router.get("/:parameter", this.show);
-        this.router.post("/", this.store);
-        this.router.put("/:parameter", this.update);
-        this.router.delete("/:parameter", this.destroy);
+        this.router.get("/articles", this.index);
+        this.router.get("/articles/:parameter", this.show);
     }
 
     private async index(req: Request, res: Response) {
@@ -203,4 +200,4 @@ class ArticleController extends Controller {
     }
 }
 
-export default new ArticleController().getRouter();
+export default new PublicController().getRouter();

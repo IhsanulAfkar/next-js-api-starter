@@ -14,6 +14,7 @@ export default class UserResource {
     transform(User: User): object {
         return {
             id: User.id,
+            uuid: User.uuid,
             name: User.name,
             username:User.username,
             phonenumber: User.phonenumber,
